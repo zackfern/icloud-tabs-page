@@ -1,0 +1,113 @@
+<html>
+  <head>
+    <title>iCloud Tabs</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        line-height: 1.5em;
+        padding: 1em;
+      }
+
+      .container {
+        display: flex;
+      }
+
+      .tabs {
+        flex-grow: 1;
+      }
+
+      .highlighted {
+        background-color: yellow;
+      }
+
+      ul.tabs {
+        padding-left: 0;
+      }
+
+      ul.tabs li {
+        list-style: none;
+        margin-bottom: 1em;
+      }
+
+      ul.tabs li .url {
+        color: grey;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="tabs">
+        <h1>iCloud Tabs</h1>
+
+        <div class="filter-status" style="display: none;">
+          Filtering by: <span class="filtered-domain"></span> &middot;
+          <a href="#" data-action="clear-filter">Clear filter</a>
+        </div>
+
+        <ul class="tabs">
+          <% tabs.each do |tab| %>
+            <li data-host="<%= tab['host'] %>">
+              <a href="<%= tab['url'] %>" target="_blank"><%= tab['title'] %></a>
+              <div class="url" title="<%= tab['url'] %>"><%= truncate_url(tab['url']) %></div>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+
+      <div class="hosts">
+        <h2>By host:</h2>
+        <ul>
+          <% unique_hosts.each do |host, count| %>
+            <li>
+              <a href="#" data-action="filter"><%= host %></a>
+              : <%= count %>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    </div>
+
+    <script>
+      function showTab(el) {
+        el.style.display = "list-item"
+      }
+
+      function hideTab(el) {
+        el.style.display = "none"
+      }
+
+      function clearFilter() {
+        document.querySelector(".filter-status").style.display = "none"
+        document.querySelector(".hosts .highlighted")?.classList.remove("highlighted")
+        document.querySelectorAll(".tabs ul li").forEach(showTab)
+      }
+
+      function filterTabs(event) {
+        let host = event.target.innerText
+
+        // Remove currently highlighted:
+        document.querySelector(".hosts .highlighted")?.classList.remove("highlighted")
+
+        // Show filter status:
+        document.querySelector(".filter-status").style.display = "block"
+        document.querySelector("span.filtered-domain").innerText = host
+
+        // Highlight this:
+        event.target.classList.add("highlighted")
+
+        // Filter the tabs:
+        document.querySelectorAll(".tabs ul li").forEach((el) => {
+          if(el.dataset.host == host) {
+            showTab(el)
+          } else {
+            hideTab(el)
+          }
+        })
+      }
+
+      document.querySelectorAll("[data-action='filter']").forEach(el => el.addEventListener('click', filterTabs))
+      document.querySelector("[data-action='clear-filter']").addEventListener('click', clearFilter)
+    </script>
+  </body>
+</html>
